@@ -1,4 +1,0 @@
-server:
-  port: 8003
-  application:
-    name: bike-service

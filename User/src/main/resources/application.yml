@@ -1,4 +1,0 @@
-server:
-  port: 8001
-  application:
-    name: user-service
