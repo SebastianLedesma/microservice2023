@@ -1,0 +1,4 @@
+server:
+  port: 8002
+  application:
+    name: car-service
