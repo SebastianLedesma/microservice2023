@@ -48,12 +48,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Car> getCars(Integer userId) {
-        return this.restTemplate.getForObject("http://localhost:8002/cars/byUser/" + userId, List.class);
+        return this.restTemplate.getForObject("http://car-service/byUser/" + userId, List.class);
     }
 
     @Override
     public List<Bike> getBikes(Integer userId) {
-        return this.restTemplate.getForObject("http://localhost:8003/bikes/byUser/" + userId, List.class);
+        return this.restTemplate.getForObject("http://bike-service/byUser/" + userId, List.class);
     }
 
     @Override
