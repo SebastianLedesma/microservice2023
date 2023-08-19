@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
         return this.restTemplate.getForObject("http://localhost:8003/bikes/byUser/" + userId, List.class);
     }
 
+    @Override
     public Car saveCar(Integer userId, Car car) {
         car.setUserId(userId);
         return this.carFeignClient.save(car);
