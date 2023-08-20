@@ -4,7 +4,7 @@ import com.microservice.User.model.entities.Bike;
 import com.microservice.User.model.entities.Car;
 import com.microservice.User.model.entities.User;
 import com.microservice.User.services.UserService;
-import org.apache.coyote.Response;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +44,7 @@ public class UserController {
         return new ResponseEntity<>(userSave, HttpStatus.CREATED);
     }
 
+    @CircuitBreaker(name = "carsCB", fallbackMethod = "fallBackGetCars")
     @GetMapping("/cars/{userId}")
     public ResponseEntity<List<Car>> getCars(@PathVariable Integer userId) {
         User user = this.userService.getById(userId);
@@ -53,7 +54,19 @@ public class UserController {
         List<Car> carList = this.userService.getCars(userId);
         return ResponseEntity.ok(carList);
     }
+    
 
+    @CircuitBreaker(name = "carsCB", fallbackMethod = "fallBackSaveCar")
+    @PostMapping("/saveCar/{userId}")
+    public ResponseEntity<Car> saveCar(@PathVariable Integer userId, @RequestBody Car car){
+        if(this.userService.getById(userId) == null){
+            return ResponseEntity.notFound().build();
+        }
+        Car carSave = this.userService.saveCar(userId, car);
+        return new ResponseEntity<>(carSave, HttpStatus.CREATED);
+    }
+
+    @CircuitBreaker(name = "bikesCB", fallbackMethod = "fallBackGetBikes")
     @GetMapping("/bikes/{userId}")
     public ResponseEntity<List<Bike>> getBikes(@PathVariable Integer userId) {
         User user = this.userService.getById(userId);
@@ -64,15 +77,7 @@ public class UserController {
         return ResponseEntity.ok(bikeList);
     }
 
-    @PostMapping("/saveCar/{userId}")
-    public ResponseEntity<Car> saveCar(@PathVariable Integer userId, @RequestBody Car car){
-        if(this.userService.getById(userId) == null){
-            return ResponseEntity.notFound().build();
-        }
-        Car carSave = this.userService.saveCar(userId, car);
-        return new ResponseEntity<>(carSave, HttpStatus.CREATED);
-    }
-
+    @CircuitBreaker(name = "bikesCB", fallbackMethod = "fallBackSaveBike")
     @PostMapping("/saveBike/{userId}")
     public ResponseEntity<Bike> saveBike(@PathVariable Integer userId, @RequestBody Bike bike){
         if(this.userService.getById(userId) == null){
@@ -82,10 +87,31 @@ public class UserController {
         return new ResponseEntity<>(bikeSave, HttpStatus.CREATED);
     }
 
+    @CircuitBreaker(name = "allCB", fallbackMethod = "fallBackGetAll")
     @GetMapping("/getAll/{userId}")
     public ResponseEntity<Map<String, Object>> getAll(@PathVariable Integer userId) {
         Map<String,Object> userAndVehicules = this.userService.getUserAndVehicules(userId);
         return new ResponseEntity<>(userAndVehicules, HttpStatus.OK);
+    }
+
+    private ResponseEntity<List<Car>> fallBackGetCars(@PathVariable Integer userId, RuntimeException ex) {
+        return new ResponseEntity("El usuario " + userId + "tiene los autos en el taller.",HttpStatus.OK);
+    }
+
+    private ResponseEntity<Car> fallBackSaveCar(@PathVariable Integer userId, @RequestBody Car car, RuntimeException ex) {
+        return new ResponseEntity("El usuario " + userId + "no tiene dinero para un auto.",HttpStatus.OK);
+    }
+
+    private ResponseEntity<List<Bike>> fallBackGetBikes(@PathVariable Integer userId, RuntimeException ex) {
+        return new ResponseEntity("El usuario " + userId + "tiene los motos en el taller.",HttpStatus.OK);
+    }
+
+    private ResponseEntity<Bike> fallBackSaveBike(@PathVariable Integer userId, @RequestBody Bike bike, RuntimeException ex) {
+        return new ResponseEntity("El usuario " + userId + "no tiene dinero para una moto.",HttpStatus.OK);
+    }
+
+    private ResponseEntity<Map<String, Object>> fallBackGetAll(@PathVariable Integer userId) {
+        return  new ResponseEntity("El usuario " + userId + " tiene los vehiculos en el taller.", HttpStatus.OK);
     }
 
 }
