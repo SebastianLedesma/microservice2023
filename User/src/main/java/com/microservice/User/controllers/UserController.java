@@ -54,7 +54,7 @@ public class UserController {
         List<Car> carList = this.userService.getCars(userId);
         return ResponseEntity.ok(carList);
     }
-    
+
 
     @CircuitBreaker(name = "carsCB", fallbackMethod = "fallBackSaveCar")
     @PostMapping("/saveCar/{userId}")
@@ -99,18 +99,18 @@ public class UserController {
     }
 
     private ResponseEntity<Car> fallBackSaveCar(@PathVariable Integer userId, @RequestBody Car car, RuntimeException ex) {
-        return new ResponseEntity("El usuario " + userId + "no tiene dinero para un auto.",HttpStatus.OK);
+        return new ResponseEntity("El usuario " + userId + " no tiene dinero para un auto.",HttpStatus.OK);
     }
 
     private ResponseEntity<List<Bike>> fallBackGetBikes(@PathVariable Integer userId, RuntimeException ex) {
-        return new ResponseEntity("El usuario " + userId + "tiene los motos en el taller.",HttpStatus.OK);
+        return new ResponseEntity("El usuario " + userId + " tiene los motos en el taller.",HttpStatus.OK);
     }
 
     private ResponseEntity<Bike> fallBackSaveBike(@PathVariable Integer userId, @RequestBody Bike bike, RuntimeException ex) {
-        return new ResponseEntity("El usuario " + userId + "no tiene dinero para una moto.",HttpStatus.OK);
+        return new ResponseEntity("El usuario " + userId + " no tiene dinero para una moto.",HttpStatus.OK);
     }
 
-    private ResponseEntity<Map<String, Object>> fallBackGetAll(@PathVariable Integer userId) {
+    private ResponseEntity<Map<String, Object>> fallBackGetAll(@PathVariable Integer userId, RuntimeException ex) {
         return  new ResponseEntity("El usuario " + userId + " tiene los vehiculos en el taller.", HttpStatus.OK);
     }
 
